@@ -1,8 +1,24 @@
 # 配置参考
 
-## 主配置
+所有配置文件都在 `plugins/HopliteRoyale/` 下。本页只列字段、示例和注意事项,**不深入实现细节**。
 
-主配置位于 `plugins/HopliteRoyale/config.yml`。
+## 文件结构
+
+```
+plugins/HopliteRoyale/
+├── config.yml                 # 主配置(数据库 / ASP / 赛季)
+├── arenas/
+│   └── default.yml            # 赛场:出生点 / 边界 / 缩圈
+├── kits/
+│   ├── miner.yml ... 共 8 个职业
+├── legendaries/
+│   ├── dragon_katana.yml ... 共 6 把传奇
+└── battlepass/
+    ├── season-1.yml
+    └── season-2.yml
+```
+
+## 主配置 `config.yml`
 
 ```yaml
 debug: false
@@ -22,22 +38,21 @@ season:
 
 | 字段 | 说明 |
 | --- | --- |
-| `debug` | 是否启用调试输出 |
-| `database.type` | 数据库类型，当前优先使用 `mysql` |
-| `database.host` | 数据库地址 |
-| `database.port` | 数据库端口 |
-| `database.database` | 数据库名 |
-| `database.username` | 数据库账号 |
-| `database.password` | 数据库密码 |
-| `database.pool-size` | 连接池大小 |
-| `asp.datasource` | ASP loader 类型 |
-| `season.auto-switch` | 是否自动处理赛季切换 |
+| `debug` | 调试日志开关 |
+| `database.type` | 数据库类型(目前 `mysql`) |
+| `database.host` / `port` / `database` | 数据库连接信息 |
+| `database.username` / `password` | 账号 |
+| `database.pool-size` | HikariCP 连接池大小,默认 10 |
+| `asp.datasource` | ASP loader 类型,跟着 ASP 配置走 |
+| `season.auto-switch` | 是否按日期自动切赛季 |
 
-## Kit 配置
+## Arena 配置
 
-Kit 配置位于 `plugins/HopliteRoyale/kits/`。
+详见[地图与赛场](./arenas)。
 
-每个 Kit 都有等级经验配置：
+## 职业(Kits)
+
+每个职业一份 yml,**字段不同**(每个职业有自己的特色字段)。通用字段:
 
 ```yaml
 xp-required:
@@ -47,7 +62,7 @@ xp-required:
   level-5: 400
 ```
 
-不同 Kit 还会有自己的物品或被动参数，例如 Miner：
+特色字段示例(矿工):
 
 ```yaml
 items:
@@ -58,21 +73,11 @@ passive:
   bonus-drop-chance: 0.20
 ```
 
-## 传奇武器配置
+更多 → [职业系统](./kits)
 
-传奇武器配置位于 `plugins/HopliteRoyale/legendaries/`。
+## 传奇武器
 
-每把武器都支持：
-
-| 字段 | 说明 |
-| --- | --- |
-| `enabled` | 是否启用 |
-| `item.base-material` | 物品基础材质，使用 namespaced key |
-| `item.custom-model-data` | 资源包模型 ID |
-| `recipe` | 合成配方 |
-| `ability` | 技能数值 |
-
-示例：
+每把武器一份 yml。通用字段:
 
 ```yaml
 enabled: true
@@ -80,21 +85,19 @@ item:
   custom-model-data: 1001
   base-material: minecraft:netherite_sword
 recipe:
-  type: anvil
-  left: minecraft:diamond_sword
-  right: minecraft:dragon_head
-  level-cost: 8
+  type: anvil               # anvil / shaped(工作台)
+  ... 配方相关字段
 ability:
-  speed-amplifier: 1
-  blink-range: 8
-  blink-cooldown-ms: 5000
+  ... 技能数值
 ```
 
-修改传奇武器配置后，可以使用 `/legendary reload` 重载。
+详细 → [传奇武器](./legendaries)
 
-## Battle Pass 配置
+修改后用 `/legendary reload` 热更新。
 
-赛季配置位于 `plugins/HopliteRoyale/battlepass/`。
+## 战令(Battle Pass)
+
+每个赛季一份 yml,例如 `season-1.yml`:
 
 ```yaml
 id: 1
@@ -106,18 +109,59 @@ tiers:
   - tier: 1
     free-reward: { type: COINS, amount: 100 }
     premium-reward: { type: COSMETIC, id: kill_effect_fire }
+  - tier: 2
+    free-reward: { type: XP_BOOST, multiplier: 1.1, duration-min: 30 }
+    premium-reward: { type: COSMETIC, id: victory_dance_robot }
 ```
 
-奖励类型包括：
-
-| 类型 | 说明 |
+| 字段 | 说明 |
 | --- | --- |
-| `COINS` | 货币奖励 |
-| `COSMETIC` | 外观奖励 |
-| `XP_BOOST` | 经验倍率加成 |
+| `id` | 赛季编号 |
+| `name` | 赛季名(GUI 显示) |
+| `start` / `end` | 起止日期(YYYY-MM-DD) |
+| `xp-per-tier` | 升一阶所需经验 |
+| `tiers[].tier` | 阶位编号 |
+| `tiers[].free-reward` | 免费轨奖励 |
+| `tiers[].premium-reward` | 进阶轨奖励 |
 
-## 配置修改建议
+奖励类型:
 
-- 生产服修改配置前先备份。
-- 涉及地图、赛季、奖励和传奇武器的修改，先在测试服跑一局。
-- 不要把真实数据库密码提交到公开仓库。
+| 类型 | 必填字段 |
+| --- | --- |
+| `COINS` | `amount` |
+| `COSMETIC` | `id`(对应外观 ID) |
+| `XP_BOOST` | `multiplier`, `duration-min` |
+
+## 配置改动建议
+
+| 修改 | 是否需要重启 |
+| --- | --- |
+| `config.yml` 数据库 / ASP | ✅ 必须重启 |
+| `arenas/*.yml` | ✅ 重启(目前没有 reload) |
+| `kits/*.yml` | ✅ 重启 |
+| `legendaries/*.yml` | ❌ `/legendary reload` 即可 |
+| `battlepass/season-N.yml` | ✅ 重启(赛季切换涉及数据库迁移) |
+
+## 安全注意
+
+::: danger 永远不要把真实密码进公开仓库
+- `config.yml` 里的数据库密码
+- ASP 数据库连接信息
+- 任何 token / API key
+
+公开仓库提交前用 `git diff` 自检,或加 `.gitignore`:
+
+```gitignore
+plugins/HopliteRoyale/config.yml
+```
+:::
+
+## 备份建议
+
+每次改配置前:
+
+```bash
+tar czf hr-config-$(date +%F-%H%M).tgz plugins/HopliteRoyale/
+```
+
+数据库备份请参考[运维 · 备份建议](./operations#备份建议)。

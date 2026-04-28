@@ -1,81 +1,112 @@
 # 安装部署
 
-## 前置要求
+> 想要"5 分钟开服"的极简版?直接看 [服主 · 5 分钟开服](./owner-quickstart)。本页是详细版。
 
-部署前需要准备：
+## 准备清单
 
-| 组件 | 要求 |
+| 组件 | 要求 / 来源 |
 | --- | --- |
-| Java | JDK 21 |
-| 服务端 | AdvancedSlimePaper 4.x，或兼容 Paper 1.21.11 的测试环境 |
-| 数据库 | MySQL 8.x |
-| 地图模板 | 已导入 ASP MySQL loader 的 SlimeWorld 模板 |
-| 插件文件 | `HopliteRoyale-0.1.0.jar` |
+| Java | **JDK 21** |
+| 服务端 | **AdvancedSlimePaper 4.x**(以下简称 ASP) |
+| 数据库 | **MySQL 8.x**(主推) |
+| 地图后端 | ASP 自带的 MySQL loader |
+| 地图模板 | 至少 1 张已转换为 SlimeWorld 的地图 |
+| 插件 jar | `HopliteRoyale-0.1.0.jar` |
 
-普通 Paper 可以用于部分非地图功能测试，但正式地图加载依赖 AdvancedSlimePaper 4.x API。
+::: tip 普通 Paper 行不行?
+非地图功能可以,但 `/br create` 一定会失败(地图加载依赖 ASP API)。**生产环境强烈建议直接 ASP**。
+:::
 
-## 部署步骤
+## 部署 7 步
 
-1. 将插件 jar 放入服务端 `plugins/` 目录。
-2. 确认服务端运行在 Java 21。
-3. 准备 MySQL 数据库和账号。
-4. 启动一次服务器，让插件生成默认配置。
-5. 停服后编辑 `plugins/HopliteRoyale/config.yml`。
-6. 确认 ASP 4.x 已能读取地图模板。
-7. 再次启动服务器，检查控制台是否出现 HopliteRoyale 启动成功日志。
+```text
+1. 把 jar 放到 plugins/
+2. 确认服务端在 Java 21 上跑
+3. 准备好 MySQL 数据库 + 账号
+4. 启动一次,让插件生成默认配置
+5. 停服,编辑 config.yml(数据库)
+6. 准备 ASP 地图模板,改 arenas/default.yml
+7. 再次启动,跑 /br create 自检
+```
 
 ## 数据库配置
 
-默认配置结构如下：
+`plugins/HopliteRoyale/config.yml`:
 
 ```yaml
-debug: false
+debug: false                # 是否打开调试日志
 database:
   type: mysql
-  host: localhost
+  host: 127.0.0.1
   port: 3306
   database: hopliteroyale
-  username: root
-  password: ""
+  username: hr_user
+  password: ""              # ⚠ 真实密码不要进 git
   pool-size: 10
 asp:
-  datasource: mysql
+  datasource: mysql         # ASP loader 类型
 season:
-  auto-switch: true
+  auto-switch: true         # 是否按日期自动切赛季
 ```
 
-首次启动会执行数据库迁移，创建玩家、比赛、Kit、Battle Pass、外观和传奇武器相关表。
+首次启动时,Flyway 会执行迁移:
 
-## 地图准备
+```
+V1__init.sql                          # 玩家、比赛、队伍核心表
+V2__battlepass_cosmetics.sql          # 战令 + 外观
+V3__legendary_obtained_season.sql     # 传奇首获记录
+V4__player_wallets.sql                # 玩家钱包
+```
 
-地图模板需要提前存入 AdvancedSlimePaper 的 MySQL loader。Arena 配置中的 `template-world` 必须和模板名一致。
+## 地图模板准备
 
-最小可用流程：
+最小可用流程:
 
-1. 准备一张可用于 Battle Royale 的地图。
-2. 使用 ASP 工具把地图转换并保存为 SlimeWorld 模板。
-3. 在 Arena 配置中填写模板名。
-4. 用 `/testmap load <template>` 验证地图能加载并传送。
-5. 用 `/testmap unload <world>` 验证地图能卸载。
+1. 准备一张可作为大逃杀场地的世界(中心可以放物资箱、有足够战斗空间)
+2. 用 ASP 工具转换并保存为 SlimeWorld 模板,假设起名 `test_arena`
+3. 确认 ASP 把模板存进了 MySQL loader
+4. 在 `arenas/default.yml` 里把 `template-world: test_arena` 对上
+5. 用 `/testmap load test_arena` 验证可加载
+6. 用 `/testmap unload <实例世界名>` 验证可卸载
 
-## 启动检查
+详见[地图与赛场](./arenas)。
 
-启动后建议检查：
+## 启动后自检
 
-- `/version HopliteRoyale` 显示插件版本。
-- `/br create default solo` 可以创建比赛实例。
-- `/br list` 能看到实例。
-- `/testmap load test_arena` 能加载测试模板。
-- 数据库中存在 Flyway 迁移记录。
+| 命令 | 应有的现象 |
+| --- | --- |
+| `/version HopliteRoyale` | 显示版本 0.1.0(或当前版本) |
+| `/br list` | 空列表(还没创建比赛) |
+| `/br create default solo` | 返回新比赛 ID |
+| `/testmap load test_arena` | 加载成功并传送 |
+| 数据库里 `flyway_schema_history` 表 | 有 V1–V4 记录 |
 
-## 更新插件
+任意一条失败 → [运维诊断](./operations)。
 
-更新前建议：
+## 升级流程
 
-1. 备份数据库。
-2. 备份 `plugins/HopliteRoyale/` 配置目录。
-3. 停服。
-4. 替换 jar。
-5. 启动并观察迁移日志。
+```text
+1. 测试服跑一遍新版本完整一局
+2. 备份生产 MySQL
+3. 备份 plugins/HopliteRoyale/ 配置
+4. 停服
+5. 替换 jar
+6. 启动观察 Flyway 迁移日志
+7. 跑一局小规模验证
+```
 
-如果更新涉及赛季、奖励或地图配置，先在测试服验证完整一局。
+::: warning 不要在玩家比赛中升级
+先 `/br list` 确认没有进行中的比赛,公告 5 分钟,再停服。
+:::
+
+## 常见首次部署坑
+
+| 现象 | 多半原因 |
+| --- | --- |
+| 启动报 `Failed to connect to MySQL` | 账号密码 / host / port / 数据库名错 |
+| 启动报 `ASP 4.x API not found` | 不是 ASP 4.x |
+| 启动报 `Flyway migration failed` | 旧表 schema 冲突 |
+| `/br create` 报 `Arena not found` | `arenas/*.yml` 没加载,看启动日志 |
+| `/br create` 报 `Template not found` | `template-world` 字段对不上 ASP 模板名 |
+
+更全的排查 → [运维诊断 · 故障排查](./operations#故障排查-启动阶段)

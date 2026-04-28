@@ -1,86 +1,111 @@
-# 命令参考
+# 命令速查
 
-## 比赛命令
+按使用场景分组的所有命令。Ctrl+F 搜你需要的关键词。
 
-| 命令 | 说明 |
+## 🎮 玩家最常用
+
+| 命令 | 用途 |
 | --- | --- |
-| `/br create <arena> <mode>` | 创建比赛实例并加载地图 |
-| `/br join <id>` | 加入指定比赛 |
+| `/br quickplay` | 快速进入单排 |
+| `/br quickplay solo` | 单排 |
+| `/br quickplay duo` | 双排 |
+| `/br quickplay squad` | 四排 |
 | `/br leave` | 离开当前比赛 |
-| `/br quickplay` | 快速加入 Solo |
-| `/br quickplay <mode>` | 快速加入指定模式：`solo`、`duo`、`squad` |
-| `/br list` | 查看当前比赛实例 |
-| `/br info <id>` | 查看比赛详情 |
-| `/br forcephase <id> <phase>` | 强制切换阶段，管理员调试用 |
+| `/kit` | 打开职业选择 GUI |
+| `/kit info <职业>` | 查看自己的职业等级 |
+| `/bp` | 打开战令 GUI |
+| `/bp progress` | 查战令进度 |
+| `/bp claim all` | 一键领取奖励 |
+| `/cosmetic` | 装备外观 |
+| `/legendary atlas` | 翻传奇图鉴 |
+| `/recipe legendary` | 看传奇配方 |
 
-## 地图调试命令
+## ⚔️ 比赛控制
 
-| 命令 | 说明 |
+| 命令 | 用途 | 权限 |
+| --- | --- | --- |
+| `/br create <arena> <模式>` | 创建比赛(模式:`solo` / `duo` / `squad`) | 服主 |
+| `/br join <比赛 ID>` | 加入指定比赛 | 玩家 |
+| `/br leave` | 离开当前比赛 | 玩家 |
+| `/br quickplay [模式]` | 快速匹配 | 玩家 |
+| `/br list` | 查看当前所有比赛实例 | 任意 |
+| `/br info <比赛 ID>` | 查看比赛详情 | 任意 |
+| `/br forcephase <比赛 ID> <阶段>` | 强制切阶段 | 服主调试 |
+
+阶段名:`WAITING` / `STARTING` / `CORNUCOPIA` / `GRACE` / `PVP` / `SHRINKING` / `ENDING`
+
+## 👥 Party(大厅组队)
+
+| 命令 | 用途 |
 | --- | --- |
-| `/testmap load <template>` | 从 ASP 模板加载实例地图并传送自己 |
-| `/testmap unload <world>` | 卸载指定实例地图 |
-| `/testmap list` | 查看通过调试命令加载的实例地图 |
+| `/party create` | 创建 Party |
+| `/party invite <玩家>` | 邀请(30 秒过期) |
+| `/party accept <队长>` | 接受邀请 |
+| `/party leave` | 离开 Party |
+| `/party kick <玩家>` | 队长踢人 |
+| `/party disband` | 队长解散 |
+| `/party list` | 查看成员 |
+| `/party chat <消息>` 或 `/p <消息>` | Party 聊天 |
 
-## Party 命令
+## 💬 比赛内队伍聊天
 
-| 命令 | 说明 |
+| 命令 | 用途 |
 | --- | --- |
-| `/party create` | 创建队伍 |
-| `/party invite <player>` | 邀请玩家，邀请 30 秒后过期 |
-| `/party accept <leader>` | 接受指定队长的邀请 |
-| `/party leave` | 离开当前队伍 |
-| `/party disband` | 队长解散队伍 |
-| `/party kick <player>` | 队长踢出成员 |
-| `/party list` | 查看队伍成员 |
-| `/party chat <message>` | 发送队伍聊天 |
-| `/p <message>` | Party 聊天快捷命令 |
+| `/tc <消息>` | 发送给当前比赛的队友 |
+| `/t <消息>` | `/tc` 的快捷命令 |
 
-## 游戏内队伍聊天
+## 🎯 职业(Kit)
 
-| 命令 | 说明 |
+| 命令 | 用途 |
 | --- | --- |
-| `/tc <message>` | 给当前比赛队友发送消息 |
-| `/t <message>` | `/tc` 的快捷命令 |
+| `/kit` | 打开 GUI |
+| `/kit list` | 查看全部职业 |
+| `/kit select <职业>` | 直接选职业 |
+| `/kit info <职业>` | 查看自己的等级 / 经验 |
 
-## Kit 命令
+可用职业 ID:`miner` / `archer` / `tank` / `ninja` / `alchemist` / `scout` / `lumberjack` / `fisher`
 
-| 命令 | 说明 |
+## 🔥 传奇武器
+
+| 命令 | 用途 | 权限 |
+| --- | --- | --- |
+| `/legendary` | 列出已注册武器 | 任意 |
+| `/legendary atlas` | 打开图鉴 GUI | 任意 |
+| `/legendary recipes` | 查看所有配方 | 任意 |
+| `/recipe legendary` | 别名 | 任意 |
+| `/legendary reload` | 重载配置 | 服主 |
+| `/legendary perf` | 查看技能调度耗时 | 服主 |
+| `/legendary perf reset` | 重置性能计数 | 服主 |
+| `/legendary giveall <玩家>` | 一键发全套(测试) | 服主 |
+
+## 🏆 战令(Battle Pass)
+
+| 命令 | 用途 |
 | --- | --- |
-| `/kit` | 打开 Kit 选择 GUI |
-| `/kit list` | 查看可用 Kit |
-| `/kit select <id>` | 直接选择 Kit |
-| `/kit info <id>` | 查看指定 Kit 等级和经验 |
+| `/bp` 或 `/bp gui` | 打开战令 GUI |
+| `/bp progress` | 查等级 / 经验 / 距离下一阶 |
+| `/bp season` | 查当前赛季信息 |
+| `/bp quests` | 查每日 / 每周任务 |
+| `/bp claim all` | 一键领可领奖励 |
+| `/bp purchase` | 开通进阶轨道(占位) |
 
-Grace 之后不能更换本局 Kit。
+## ✨ 外观
 
-## 传奇武器命令
-
-| 命令 | 说明 |
+| 命令 | 用途 |
 | --- | --- |
-| `/legendary` | 列出可用传奇武器 |
-| `/legendary atlas` | 打开传奇武器图鉴 |
-| `/legendary recipes` | 查看已注册传奇配方 |
-| `/recipe legendary` | 查看传奇配方别名命令 |
-| `/legendary reload` | 重载传奇武器配置，需要管理员权限 |
-| `/legendary perf` | 查看传奇调度性能，需要管理员权限 |
-| `/legendary perf reset` | 重置性能计数 |
-| `/legendary giveall <player>` | 给指定玩家发放全部传奇武器，需要管理员权限 |
+| `/cosmetic` | 打开装备 GUI |
+| `/cosmetics` | 别名 |
 
-## Battle Pass 命令
+## 🗺️ 地图调试(服主)
 
-| 命令 | 说明 |
+| 命令 | 用途 |
 | --- | --- |
-| `/bp` | 打开 Battle Pass GUI |
-| `/bp gui` | 打开 Battle Pass GUI |
-| `/bp progress` | 查看当前 Battle Pass 等级和经验 |
-| `/bp season` | 查看当前赛季 |
-| `/bp quests` | 查看每日和每周任务 |
-| `/bp claim all` | 一键领取可领取奖励 |
-| `/bp purchase` | 开通 Premium 轨道，占位实现 |
+| `/testmap load <模板>` | 从 ASP 模板加载实例并传送自己 |
+| `/testmap unload <世界名>` | 卸载指定实例 |
+| `/testmap list` | 查看通过调试加载的实例 |
 
-## 外观命令
+## 通用
 
-| 命令 | 说明 |
+| 命令 | 用途 |
 | --- | --- |
-| `/cosmetic` | 打开外观装备 GUI |
-| `/cosmetics` | `/cosmetic` 的别名 |
+| `/version HopliteRoyale` | 查插件版本 |
