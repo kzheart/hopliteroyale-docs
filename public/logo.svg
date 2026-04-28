@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="HopliteRoyale">
+  <rect width="96" height="96" rx="18" fill="#17120d"/>
+  <path d="M48 10 76 23v20c0 20-11 34-28 43-17-9-28-23-28-43V23L48 10Z" fill="#b98b45"/>
+  <path d="M48 20 66 29v15c0 13-7 23-18 30-11-7-18-17-18-30V29l18-9Z" fill="#21170f"/>
+  <path d="M48 27c10 0 17 7 17 17 0 7-4 13-10 16l-3-9c3-2 5-4 5-8 0-5-4-9-9-9s-9 4-9 9c0 4 2 7 5 8l-3 9c-6-3-10-9-10-16 0-10 7-17 17-17Z" fill="#f4ead7"/>
+  <path d="M45 53h6v25h-6z" fill="#f4ead7"/>
+</svg>
