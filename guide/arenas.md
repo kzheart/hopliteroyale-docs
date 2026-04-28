@@ -10,15 +10,15 @@ plugins/HopliteRoyale/arenas/
 └── 你可以加更多.yml
 ```
 
-每个 yml 一张赛场配置,文件名随意,以内部 `id` 字段为准。
+每个 yml 一张赛场配置,文件名随意,**以内部 `id` 字段为准**。
 
-## 一份完整示例
+## 完整示例(默认配置)
 
 ```yaml
 id: default
 template-world: test_arena      # ⚠ 必须和 ASP 模板名一致
 
-# 边界中心
+# 边界中心(也是缩圈中心)
 center:
   x: 0.0
   y: 80.0
@@ -31,45 +31,79 @@ initial-border-size: 1000.0
 
 # 出生点(玩家 / 队伍开局位置)
 spawn-points:
-  - { x: 12.0,  y: 80.0, z: 0.0, yaw: 90.0,  pitch: 0.0 }
-  - { x: -12.0, y: 80.0, z: 0.0, yaw: 270.0, pitch: 0.0 }
-  - { x: 0.0,   y: 80.0, z: 12.0, yaw: 180.0, pitch: 0.0 }
-  - { x: 0.0,   y: 80.0, z: -12.0, yaw: 0.0,  pitch: 0.0 }
+  - { x: 12.0,  y: 80.0, z: 0.0,   yaw: 90.0,  pitch: 0.0 }
+  - { x: -12.0, y: 80.0, z: 0.0,   yaw: -90.0, pitch: 0.0 }
+  - { x: 0.0,   y: 80.0, z: 12.0,  yaw: 180.0, pitch: 0.0 }
+  - { x: 0.0,   y: 80.0, z: -12.0, yaw: 0.0,   pitch: 0.0 }
 
 # 中心物资箱(丰饶角阶段生成)
 starting-chests:
-  - location: { x: 0.0, y: 80.0, z: 0.0 }
+  - location: { x: 0.0, y: 80.0, z: 0.0, yaw: 0.0, pitch: 0.0 }
     items:
       - { material: minecraft:stone_sword, amount: 1 }
-      - { material: minecraft:bread, amount: 8 }
+      - { material: minecraft:bread,       amount: 8 }
 
-# 缩圈计划
+# 缩圈计划(默认 4 段)
 shrink-stages:
-  - phase: PVP
-    target-size: 500.0
-    duration-sec: 300
-    delay-sec: 0
-  - phase: SHRINKING
-    target-size: 200.0
-    duration-sec: 240
-    delay-sec: 30
-  - phase: SHRINKING
-    target-size: 50.0
-    duration-sec: 180
-    delay-sec: 30
+  - { phase: PVP,       target-size: 500.0, duration-sec: 300, delay-sec: 0  }
+  - { phase: SHRINKING, target-size: 200.0, duration-sec: 240, delay-sec: 30 }
+  - { phase: SHRINKING, target-size:  50.0, duration-sec: 180, delay-sec: 60 }
+  - { phase: SHRINKING, target-size:  10.0, duration-sec: 120, delay-sec: 60 }
 ```
 
 ## 字段速查
 
-| 字段 | 说明 |
-| --- | --- |
-| `id` | Arena ID,命令里用(如 `/br create default solo`) |
-| `template-world` | ASP 模板世界名 |
-| `center` | 边界中心(也是缩圈中心) |
-| `initial-border-size` | 初始边界大小 |
-| `spawn-points` | 玩家/队伍开局点列表 |
-| `starting-chests` | 中心物资箱(丰饶角阶段生成) |
-| `shrink-stages` | 缩圈计划(下面详说) |
+### 顶层
+
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `id` | string | ✅ | Arena ID,命令里用(如 `/br create default solo`) |
+| `template-world` | string | ✅ | ASP 模板世界名,**必须和 ASP loader 里收录的名字一致** |
+| `center.{x,y,z,yaw,pitch}` | double | ✅ | 边界中心 |
+| `initial-border-size` | double | ✅ | 初始边界大小(方边长,默认 1000) |
+| `spawn-points[]` | list | ✅ | 出生点列表 |
+| `starting-chests[]` | list | ⚠ | 中心物资箱列表(可空,但建议至少 1 个) |
+| `shrink-stages[]` | list | ✅ | 缩圈计划 |
+
+### 坐标对象 `{x, y, z, yaw, pitch}`
+
+出现在 `center`、`spawn-points[]`、`starting-chests[].location`。
+
+| 字段 | 类型 | 单位 | 说明 |
+| --- | --- | --- | --- |
+| `x` | double | 方块 | X 坐标 |
+| `y` | double | 方块 | Y 坐标(高度) |
+| `z` | double | 方块 | Z 坐标 |
+| `yaw` | float | 度 | 朝向(-180 ~ 180,0 = 南,90 = 西,-90 = 东,180/-180 = 北) |
+| `pitch` | float | 度 | 俯仰角(-90 = 朝天,0 = 平视,90 = 朝地) |
+
+::: tip 取坐标的快捷办法
+游戏里站在你想要的位置,按 F3 看 XYZ 和 Facing。把 Facing 那行的 yaw/pitch 直接抄进去。
+:::
+
+### `starting-chests[]`
+
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `location` | 坐标对象 | ✅ | 箱子坐标(yaw/pitch 一般可以填 0) |
+| `items[]` | list | ✅ | 箱内物品 |
+| `items[].material` | namespaced key | ✅ | 物品 ID,如 `minecraft:stone_sword` |
+| `items[].amount` | int | ✅ | 数量(1-64,超出会被限制到堆叠上限) |
+
+### `shrink-stages[]`
+
+每一段告诉边界**什么时候、缩到多大、缩多久**:
+
+| 字段 | 类型 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| `phase` | enum | — | 触发阶段:`PVP` 或 `SHRINKING` |
+| `target-size` | double | — | 目标边界大小 |
+| `duration-sec` | int | — | WorldBorder 插值时长(秒)——边界从当前大小**线性缩小到**目标大小所用的时间 |
+| `delay-sec` | int | — | 进入该阶段后**多少秒**触发这一段(可以为 0) |
+
+::: warning `phase` 只能是 PVP 或 SHRINKING
+其它阶段(`WAITING` / `STARTING` / `CORNUCOPIA` / `GRACE` / `ENDING`)写进去**不会触发缩圈**——前期阶段插件强制 PvP 关闭,缩圈逻辑只在战斗阶段和缩圈阶段跑。
+:::
 
 ## 出生点策略
 
@@ -78,9 +112,12 @@ shrink-stages:
 - 双排:每个**队伍**一个出生点,队员落在附近(自动小偏移)
 - 四排:同上
 - 出生点之间**间距 ≥ 8 格**,避免视野重叠
+- Y 坐标必须在**实体物料表面之上**——地图克隆出来后不会重新生成方块
 
 ::: tip 没足够出生点会怎样?
-系统会复用并做小范围偏移。少量复用没问题,大量复用会让玩家挤在一起开局。
+系统会复用并做小范围随机偏移。少量复用没问题,大量复用会让玩家挤在一起开局。
+
+具体规则:有 4 个出生点 + 8 个队伍时,每个出生点会被用 2 次,但相邻队伍会偏移 ±3 格防止叠在一起。
 :::
 
 ## 中心物资箱
@@ -90,33 +127,43 @@ shrink-stages:
 - 中心 1 个主箱 + 周围 4 个副箱是常见布局
 - 主箱可以放石剑 / 弓 / 食物 / 少量铁
 - 副箱放面包 / 木镐 / 木斧
-- 不要放钻石装备 / 已合成的传奇——破坏前期节奏
+- **不要**放钻石装备 / 已合成的传奇——破坏前期节奏
 
-## 缩圈计划
-
-`shrink-stages` 是一个数组,每一项告诉边界**什么时候、缩到多大、缩多久**:
+### 多个箱子示例
 
 ```yaml
-- phase: PVP            # 在哪个阶段触发
-  target-size: 500.0    # 目标边界大小
-  duration-sec: 300     # WorldBorder 插值时长(秒)
-  delay-sec: 0          # 进入该阶段后多少秒触发
+starting-chests:
+  # 中央主箱
+  - location: { x: 0.0, y: 80.0, z: 0.0 }
+    items:
+      - { material: minecraft:iron_sword, amount: 1 }
+      - { material: minecraft:bow,        amount: 1 }
+      - { material: minecraft:arrow,      amount: 16 }
+      - { material: minecraft:bread,      amount: 8 }
+  # 北副箱
+  - location: { x: 0.0, y: 80.0, z: -10.0 }
+    items:
+      - { material: minecraft:wooden_pickaxe, amount: 1 }
+      - { material: minecraft:bread,          amount: 4 }
+  # 南副箱
+  - location: { x: 0.0, y: 80.0, z: 10.0 }
+    items:
+      - { material: minecraft:wooden_axe, amount: 1 }
+      - { material: minecraft:cobblestone, amount: 32 }
 ```
 
-| 字段 | 说明 |
-| --- | --- |
-| `phase` | 触发阶段:`PVP` / `SHRINKING` |
-| `target-size` | 收缩到的目标大小 |
-| `duration-sec` | 收缩持续时长(原版 WorldBorder 插值) |
-| `delay-sec` | 进入该阶段多少秒后开始 |
+## 缩圈节奏(参考方案)
 
-### 经典缩圈节奏(参考)
+下面是默认 4 段的体感:
 
-| 阶段 | 触发时机 | 目标大小 | 时长 | 体验 |
+| 段 | 触发 | 大小变化 | 时长 | 玩家体验 |
 | --- | --- | --- | --- | --- |
-| PvP 第一缩 | PvP 开始 +0s | 1000 → 500 | 300s | 玩家被推向中央 |
-| 缩圈第一段 | 缩圈阶段 +30s | 500 → 200 | 240s | 战斗集中,激烈 |
-| 缩圈第二段 | 缩圈阶段 +30s | 200 → 50 | 180s | 终局压缩,3 分钟内必定决出 |
+| 1 | PvP 开始 +0s | 1000 → 500 | 5 分钟 | 玩家被推向中央 |
+| 2 | 缩圈阶段 +30s | 500 → 200 | 4 分钟 | 战斗集中,激烈 |
+| 3 | 缩圈阶段 +60s | 200 → 50 | 3 分钟 | 终局压缩 |
+| 4 | 缩圈阶段 +60s | 50 → 10 | 2 分钟 | 决死之圈 |
+
+总缩圈时长约 14 分钟。如果你想做"短局"版本,把每段 `duration-sec` 砍半即可。
 
 ## 地图生命周期
 
@@ -134,6 +181,20 @@ shrink-stages:
 
 整个生命周期里**不影响主世界**——这就是用 ASP 模板的意义。
 
+## 多张地图
+
+可以同时维护多张赛场,玩家可以指定:
+
+```
+arenas/
+├── default.yml          (id: default)
+├── desert_ruins.yml     (id: desert_ruins)
+├── frozen_keep.yml      (id: frozen_keep)
+└── volcanic_arena.yml   (id: volcanic_arena)
+```
+
+`/br create <id> <模式>` 即可指定。
+
 ## 调试建议
 
 | 步骤 | 命令 |
@@ -145,19 +206,11 @@ shrink-stages:
 | 5. 自己进场 | `/br join <id>` |
 | 6. 跳阶段验证缩圈 | `/br forcephase <id> SHRINKING` |
 
-## 进阶:多张地图
+## 修改后
 
-可以同时维护多张赛场,玩家投票或随机选:
-
-```
-arenas/
-├── default.yml          (id: default)
-├── desert_ruins.yml     (id: desert_ruins)
-├── frozen_keep.yml      (id: frozen_keep)
-└── volcanic_arena.yml   (id: volcanic_arena)
-```
-
-`/br create <id> <mode>` 即可指定。
+::: warning Arena 改完要重启
+`arenas/*.yml` 不支持热重载,目前必须**重启服务器**。
+:::
 
 ## 常见错误
 
@@ -167,3 +220,5 @@ arenas/
 | 玩家落到方块里 | 出生点 Y 坐标在地下 / 重叠在方块里 |
 | 缩圈开始时玩家被秒杀 | `target-size` 太小 + 玩家在边缘 |
 | 中心物资箱拿不到 | `starting-chests.location` 在墙里 |
+| 边界尺寸异常 | `initial-border-size` 写成 int 而不是 double——保险点带 `.0` |
+| 缩圈不触发 | `phase` 写错(只能 `PVP` 或 `SHRINKING`,大写) |

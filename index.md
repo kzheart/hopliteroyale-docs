@@ -41,51 +41,47 @@ features:
 ---
 
 <div class="hr-section">
-  <h2>选择你的入口</h2>
-  <p class="hr-section-sub">三类用户,三条路径。点对应卡片直接进入对应文档。</p>
-
-  <div class="hr-roles">
-    <a class="hr-role-card" href="./guide/player-quickstart">
-      <span class="hr-role-emoji">🎮</span>
-      <div class="hr-role-title">我是玩家</div>
-      <div class="hr-role-desc">想知道怎么进游戏、阶段是怎么回事、职业怎么选、传奇怎么用、战令怎么升。</div>
-      <div class="hr-role-cta">3 分钟看完上场 →</div>
-    </a>
-
-    <a class="hr-role-card" href="./guide/owner-quickstart">
-      <span class="hr-role-emoji">🏰</span>
-      <div class="hr-role-title">我是服主</div>
-      <div class="hr-role-desc">想把插件搭起来、配数据库、加地图、开始测试一局,以及处理常见崩盘。</div>
-      <div class="hr-role-cta">5 分钟开起一局 →</div>
-    </a>
-
-    <a class="hr-role-card" href="./guide/commands">
-      <span class="hr-role-emoji">📜</span>
-      <div class="hr-role-title">我要查命令</div>
-      <div class="hr-role-desc">所有命令、所有配置字段、所有 FAQ。直接 Ctrl+F 搜你需要的关键词。</div>
-      <div class="hr-role-cta">直达命令速查 →</div>
-    </a>
-  </div>
+<h2>选择你的入口</h2>
+<p class="hr-section-sub">三类用户,三条路径。点对应卡片直接进入对应文档。</p>
+<div class="hr-roles">
+<a class="hr-role-card" href="./guide/player-quickstart">
+<span class="hr-role-emoji">🎮</span>
+<div class="hr-role-title">我是玩家</div>
+<div class="hr-role-desc">想知道怎么进游戏、阶段是怎么回事、职业怎么选、传奇怎么用、战令怎么升。</div>
+<div class="hr-role-cta">3 分钟看完上场 →</div>
+</a>
+<a class="hr-role-card" href="./guide/owner-quickstart">
+<span class="hr-role-emoji">🏰</span>
+<div class="hr-role-title">我是服主</div>
+<div class="hr-role-desc">想把插件搭起来、配数据库、加地图、开始测试一局,以及处理常见崩盘。</div>
+<div class="hr-role-cta">5 分钟开起一局 →</div>
+</a>
+<a class="hr-role-card" href="./guide/commands">
+<span class="hr-role-emoji">📜</span>
+<div class="hr-role-title">我要查命令</div>
+<div class="hr-role-desc">所有命令、所有配置字段、所有 FAQ。直接 Ctrl+F 搜你需要的关键词。</div>
+<div class="hr-role-cta">直达命令速查 →</div>
+</a>
+</div>
 </div>
 
 <div class="hr-section">
-  <h2>一局比赛长这样</h2>
-  <p class="hr-section-sub">从大厅到结算,7 个阶段全自动推进,玩家什么都不用管。</p>
-
-  <div class="hr-timeline">
-    <div class="hr-timeline-step"><strong>等待中</strong>凑人数</div>
-    <div class="hr-timeline-step"><strong>准备开始</strong>30 秒</div>
-    <div class="hr-timeline-step"><strong>丰饶角</strong>抢中心箱</div>
-    <div class="hr-timeline-step"><strong>发育期</strong>12 分钟</div>
-    <div class="hr-timeline-step is-pvp"><strong>PvP</strong>开战</div>
-    <div class="hr-timeline-step"><strong>缩圈</strong>压缩战场</div>
-    <div class="hr-timeline-step"><strong>结算</strong>定胜负</div>
-  </div>
+<h2>一局比赛长这样</h2>
+<p class="hr-section-sub">从大厅到结算,7 个阶段全自动推进,玩家什么都不用管。</p>
+<div class="hr-timeline">
+<div class="hr-timeline-step"><strong>等待中</strong>凑人数</div>
+<div class="hr-timeline-step"><strong>准备开始</strong>30 秒</div>
+<div class="hr-timeline-step"><strong>丰饶角</strong>抢中心箱</div>
+<div class="hr-timeline-step"><strong>发育期</strong>12 分钟</div>
+<div class="hr-timeline-step is-pvp"><strong>PvP</strong>开战</div>
+<div class="hr-timeline-step"><strong>缩圈</strong>压缩战场</div>
+<div class="hr-timeline-step"><strong>结算</strong>定胜负</div>
+</div>
 </div>
 
 <div class="hr-section">
-  <h2>项目定位</h2>
-  <p class="hr-section-sub">面向独立小游戏服 / Battle Royale 主题服 / 公会内部 PvP 训练场。</p>
+<h2>项目定位</h2>
+<p class="hr-section-sub">面向独立小游戏服 / Battle Royale 主题服 / 公会内部 PvP 训练场。</p>
 </div>
 
 > **本仓库只发布公开文档**,不发布插件源码、不发布私有地图、不发布数据库凭证。所有示例配置仅作演示,真实部署请参考[安装部署](./guide/install)。
