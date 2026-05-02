@@ -34,7 +34,7 @@ features:
     details: 龙之刃、岩浆棍、守卫者炮 …… 合成 + 主动技能 + 被动 + 图鉴 + 配方书，全套都有。
   - icon: 🪙
     title: 奖励钩子开放
-    details: 内置战令 / 外观已下线。胜负、击杀、首杀、淘汰全部走 Bukkit 事件 + 控制台命令模板，第三方插件随便接。
+    details: 胜负、击杀、首杀、淘汰全部走 Bukkit 事件 + `config.yml` 控制台命令模板，第三方插件接积分 / 商店 / 排行 / 任务全靠它。
   - icon: 🌐
     title: 双语 i18n
     details: en_US / zh_CN 内置，按客户端 locale 自动切换。控制台/非玩家 Audience 走 default-locale，无效配置回退到 fallback-locale。

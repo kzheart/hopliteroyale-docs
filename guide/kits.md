@@ -2,13 +2,6 @@
 
 职业（PlayerClass）决定你**这一局的开局装备**和部分**被动 / 属性加成**。8 个基础职业，每个都能从 Lv1 升到 Lv5——打得越多，越强。
 
-::: tip 旧名 "Kit" 已经被重构为 "PlayerClass"
-- 命令前缀：`/kit` → **`/class`**
-- 配置目录：`plugins/HopliteRoyale/kits/` → **`plugins/HopliteRoyale/classes/`**
-- 升级曲线：默认从 100 / 200 / 300 / 400 调整为 **100 / 300 / 700 / 1500**
-- 新增 `attributes:` 字段：解锁等级时直接挂 Bukkit Attribute Modifier
-:::
-
 ## 8 个职业一览
 
 | 职业 ID | 中文 | 定位 | 关键内容 |
@@ -51,11 +44,7 @@
 | 击杀一人 | +10 |
 | 获胜 | +100 |
 
-经验落库，**下一局自动应用**当前等级。
-
-::: tip 没有保护期 XP 注入
-保护期（丰饶角 / 发育期）不再自动塞熟练度经验，所有经验都来自真实战斗结算。
-:::
+经验落库，**下一局自动应用**当前等级。所有经验只在真实战斗结算时落库（保护期不会自动塞熟练度）。
 
 ## 玩家命令
 
@@ -63,7 +52,7 @@
 /class                       # 打开 GUI 选职业
 /class list                  # 查看全部职业
 /class select archer         # 直接选弓手
-/class info archer           # 查看自己弓手等级 / 经验
+/class info archer         # 查看自己弓手等级 / 经验
 ```
 
 ::: warning 发育期之后职业锁定

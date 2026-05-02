@@ -64,10 +64,6 @@
 
 可用职业 ID：`miner` / `archer` / `tank` / `ninja` / `alchemist` / `scout` / `lumberjack` / `fisher`
 
-::: tip 旧命令已下线
-原来的 `/kit` 系列命令已经移除。请改用 `/class`。
-:::
-
 ## 🔥 传奇武器
 
 | 命令 | 用途 | 权限 |
@@ -94,13 +90,3 @@
 | 命令 | 用途 |
 | --- | --- |
 | `/version HopliteRoyale` | 查插件版本 |
-
-## 已下线的命令
-
-下面这些命令在历史版本里出现过，**当前版本已经全部移除**，不会再注册到服务器：
-
-| 旧命令 | 替代方案 |
-| --- | --- |
-| `/kit *` | `/class *` |
-| `/bp` / `/bp gui` / `/bp progress` / `/bp claim all` / … | 战令系统已移除，改用 [奖励钩子与外部接入](./battlepass) |
-| `/cosmetic` / `/cosmetics` | 外观系统已移除 |

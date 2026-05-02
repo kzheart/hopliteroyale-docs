@@ -52,8 +52,7 @@ export default defineConfig({
             { text: '安装部署', link: '/guide/install' },
             { text: '地图与赛场', link: '/guide/arenas' },
             { text: '配置参考', link: '/guide/configuration' },
-            { text: '日常运维', link: '/guide/operations' },
-            { text: '赛季（已下线）', link: '/guide/season' }
+            { text: '日常运维', link: '/guide/operations' }
           ]
         },
         {

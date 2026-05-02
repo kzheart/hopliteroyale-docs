@@ -1,12 +1,6 @@
 # 奖励钩子与外部接入
 
-::: warning 历史背景
-HopliteRoyale 原本内置过一套战令 / 外观 / 钱包系统（`/bp`、`/cosmetic`、`COINS`、`COSMETIC`、`XP_BOOST` 等）。**这一整块已经从插件中移除**——本体只负责"开一局打到结束"的核心循环，奖励 / 长线运营留给外部插件接入。
-
-如果你想找原来的 `/bp` / `/cosmetic` 用法，那些命令已经全部下线，请改用以下两种新方式之一。
-:::
-
-服主想要在比赛结束、击杀、首杀、淘汰等关键时刻发奖、做战令、上排行榜，有两条路：
+HopliteRoyale 本体只负责"开一局打到结束"——胜负、击杀、首杀、淘汰这些里程碑通过两条对外通道暴露，让其他插件做积分 / 商店 / 排行 / 任务等长线运营。
 
 1. **轻量级**：开 `config.yml` 的 `rewards.commands`，在指定钩子下执行控制台命令
 2. **重量级**：自己写一个外部 Paper 插件，依赖 `:api` 子模块，订阅 Bukkit 事件，做任意逻辑
@@ -75,7 +69,7 @@ rewards:
 
 ## 方式二：`:api` 子模块 + Bukkit 事件
 
-适合做战令 / 排行榜 / 复杂奖励规则。`HopliteRoyale-api` 是公开发布的 jar，你的外部插件 `compileOnly` 它即可。
+适合做排行榜 / 任务 / 复杂奖励规则。`HopliteRoyale-api` 是公开发布的 jar，你的外部插件 `compileOnly` 它即可。
 
 ### 拿 API jar
 
@@ -148,7 +142,7 @@ public final class MyHopliteRewardsListener implements Listener {
     @EventHandler
     public void onKill(PlayerKillEvent e) {
         // e.getKiller() / e.getVictim() / e.getCause() / e.getGame()
-        // 这里调用你自家的积分 / 战令服务
+        // 这里调用你自家的积分 / 排行榜服务
     }
 
     @EventHandler
@@ -191,7 +185,7 @@ mgr.activeGames().forEach(game -> {
 | --- | --- |
 | 给胜者发点积分 / 全服广播 | 命令钩子 |
 | 计算"每日 3 杀解锁奖励" | API + 事件 + 自家存储 |
-| 战令 / 经验加成 / 任务系统 | API + 事件 |
+| 任务系统 / 赛季轨道 / 经验加成 | API + 事件 |
 | 多服群同步排行榜 | API + 事件 + 你自己的同步层 |
 | 把 HopliteRoyale 接到 PlaceholderAPI | API（监听 `PlayerKillEvent` 等更新缓存） |
 
@@ -210,6 +204,3 @@ mgr.activeGames().forEach(game -> {
 
 **Q：API 事件是同步还是异步？**
 全部主线程同步事件——可以直接读写 Bukkit 状态，不要在事件里做长耗时 IO。
-
-**Q：旧版的战令进度数据库表还在吗？**
-迁移已经清理过，老库里残留的战令 / 外观相关表不影响新版本启动。要彻底清理建议手动 `DROP TABLE`。

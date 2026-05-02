@@ -40,7 +40,6 @@ plugins/HopliteRoyale/
 - 主配置只读 `config.yml` 一个文件
 - `arenas/`、`classes/`、`legendaries/`、`custom-crafts/` 下的所有 yml 都会被读
 - `lang/` 下的资源会在启动时释放，可被服主覆盖
-- 旧版的 `kits/` 与 `battlepass/` 目录已经下线
 :::
 
 ---

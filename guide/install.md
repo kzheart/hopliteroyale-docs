@@ -46,24 +46,14 @@ database:
 asp:
   datasource: mysql         # ASP loader 类型
 rewards:
-  enabled: false            # 奖励钩子总开关，详见《奖励钩子与外部接入》
+  enabled: false            # 奖励钩子总开关，详见 [奖励钩子与外部接入](./battlepass)
 i18n:
   default-locale: zh_CN
   fallback-locale: en_US
   allow-player-override: true
 ```
 
-首次启动时，Flyway 会执行迁移：
-
-```
-V1__init.sql                          # 玩家、比赛、队伍、职业进度表
-V3__legendary_obtained_season.sql     # 传奇首获记录（带 season 列）
-V4__rename_kit_to_player_class.sql    # 表 / 列重命名：kit → player_class
-```
-
-::: tip 旧赛季 / 战令 / 钱包表在哪里？
-原本的 `V2__battlepass_cosmetics.sql` / `V4__player_wallets.sql` 追加的表已随战令 / 外观系统一起下线。升级老库时 Flyway 会跳过该版本号，留在库里的老表不影响启动。要彻底清理请手动 `DROP TABLE`。
-:::
+首次启动时，Flyway 会执行迁移，建立玩家 / 比赛 / 队伍 / 职业进度 / 传奇首获等核心表。`db/migration/` 下的 `V*__*.sql` 是当前生效的 schema。
 
 ## 地图模板准备
 
@@ -86,7 +76,7 @@ V4__rename_kit_to_player_class.sql    # 表 / 列重命名：kit → player_clas
 | `/br list` | 空列表(还没创建比赛) |
 | `/br create default solo` | 返回新比赛 ID |
 | `/testmap load test_arena` | 加载成功并传送 |
-| 数据库里 `flyway_schema_history` 表 | 至少有 V1 / V3 / V4 记录 |
+| 数据库里 `flyway_schema_history` 表 | 有迁移记录 |
 
 任意一条失败 → [运维诊断](./operations)。
 
