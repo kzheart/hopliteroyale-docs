@@ -40,8 +40,8 @@ export default defineConfig({
           items: [
             { text: '比赛七阶段', link: '/guide/phases' },
             { text: '组队模式（单/双/四排）', link: '/guide/team-modes' },
-            { text: '职业系统', link: '/guide/kits' },
-            { text: '传奇武器', link: '/guide/legendaries' },
+            { text: '职业图鉴', link: '/guide/class-list' },
+            { text: '传奇武器图鉴', link: '/guide/legendary-list' },
             { text: '奖励钩子与外部接入', link: '/guide/battlepass' }
           ]
         },
@@ -52,6 +52,8 @@ export default defineConfig({
             { text: '安装部署', link: '/guide/install' },
             { text: '地图与赛场', link: '/guide/arenas' },
             { text: '配置参考', link: '/guide/configuration' },
+            { text: '职业配置', link: '/guide/kits' },
+            { text: '传奇配置', link: '/guide/legendaries' },
             { text: '日常运维', link: '/guide/operations' }
           ]
         },
