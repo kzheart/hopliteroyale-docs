@@ -27,15 +27,17 @@ cp HopliteRoyale-0.1.0.jar /server/plugins/
 # 看到 [HopliteRoyale] Generated default config 就可以 Ctrl+C
 ```
 
-启动后会出现:
+启动后会出现：
 
 ```
 plugins/HopliteRoyale/
-├── config.yml              # 主配置
+├── config.yml              # 主配置（数据库 / ASP / rewards / i18n）
+├── healing.yml             # 治疗规则 + 玩家头颅 / 金头
 ├── arenas/                 # 地图配置
-├── kits/                   # 8 个职业配置
+├── classes/                # 8 个职业配置
 ├── legendaries/            # 6 把传奇配置
-└── battlepass/             # 赛季配置
+├── custom-crafts/          # 自定义合成（金头、速合铁砧 …）
+└── lang/                   # i18n 文案
 ```
 
 ## 第 2 步:配数据库
@@ -93,7 +95,7 @@ starting-chests:
 ```
 [HopliteRoyale] Connected to MySQL
 [HopliteRoyale] Flyway migrations applied: V1, V2, V3, V4
-[HopliteRoyale] Loaded 8 kits, 6 legendaries
+[HopliteRoyale] Loaded 8 classes, 6 legendaries
 [HopliteRoyale] Loaded 1 arena: default
 ```
 
@@ -121,8 +123,8 @@ starting-chests:
 跑完一局后:
 
 - 数据库里应该有玩家记录、比赛记录
-- 玩家 `/kit info <id>` 能看到经验
-- 玩家 `/bp progress` 能看到战令经验
+- 玩家 `/class info <id>` 能看到经验
+- 想接外部奖励 / 战令？参考 [奖励钩子与外部接入](./battlepass)
 
 ## 常见首次开服坑
 
@@ -140,5 +142,5 @@ starting-chests:
 
 - 想细调地图边界、缩圈节奏 → [地图与赛场](./arenas)
 - 想知道每个配置字段的意思 → [配置参考](./configuration)
-- 想准备下个赛季 → [赛季切换](./season)
+- 想接外部奖励、自家战令、积分 → [奖励钩子与外部接入](./battlepass)
 - 出问题查不到原因 → [常见问题](./faq)

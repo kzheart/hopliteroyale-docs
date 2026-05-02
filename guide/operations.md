@@ -9,8 +9,7 @@
 | 服务端日志有没有 `HopliteRoyale` 报错 | 控制台 grep `HopliteRoyale` |
 | MySQL 是否能连接 | `/br create default solo` 不报错就行 |
 | ASP 地图模板可读取 | `/testmap load <模板>` |
-| 当前赛季正确 | `/bp season` 看到名字和日期 |
-| 战令奖励能领 | `/bp claim all` |
+| 奖励钩子有效 | 在 `config.yml` 里打开 `rewards.enabled` 后，检查控制台输出是否有对应指令 |
 
 ## 每周检查(10 分钟)
 
@@ -118,12 +117,14 @@ Ending 阶段异常退出 / ASP 删除失败。临时方案:
 2. 玩家是否中途**离场**(中途退出不算参与)
 3. 数据库连接是否正常(`/br create` 能成功就基本正常)
 
-### 玩家说"我领的战令奖励消失了"
+### 玩家说“我击杀了 / 赢了但没拿到积分”
 
-外观存的是"是否拥有"标记,不是物品。`/cosmetic` GUI 里应该能看到,如果 GUI 里也没了:
+奖励现在都走 `rewards.commands` 或你自己那个外部接入插件。检查顺序：
 
-1. 检查 `cosmetic_ownership` 表里有没有该玩家该外观
-2. 是否赛季切换时配置错了(罕见)
+1. `config.yml` 的 `rewards.enabled` 是不是 `true`
+2. 控制台报了什么错（奖励指令报错会在控制台骨架里）
+3. 占位符是否拼写错误（为 `{player}` 不是 `%player%`）
+4. 所有命令都以控制台身份执行，需要玩家主体的命令请反映为其提供者插件的问题
 
 ---
 

@@ -1,286 +1,215 @@
-# 战令与外观
+# 奖励钩子与外部接入
 
-战令(Battle Pass)是 HopliteRoyale 的**长期目标**——每个赛季给玩家一条 100 阶左右的成长曲线,免费 + 进阶双轨,配合每日/每周任务,让玩家有理由每天上来打几局。
+::: warning 历史背景
+HopliteRoyale 原本内置过一套战令 / 外观 / 钱包系统（`/bp`、`/cosmetic`、`COINS`、`COSMETIC`、`XP_BOOST` 等）。**这一整块已经从插件中移除**——本体只负责"开一局打到结束"的核心循环，奖励 / 长线运营留给外部插件接入。
 
-## 战令是什么
+如果你想找原来的 `/bp` / `/cosmetic` 用法，那些命令已经全部下线，请改用以下两种新方式之一。
+:::
 
+服主想要在比赛结束、击杀、首杀、淘汰等关键时刻发奖、做战令、上排行榜，有两条路：
+
+1. **轻量级**：开 `config.yml` 的 `rewards.commands`，在指定钩子下执行控制台命令
+2. **重量级**：自己写一个外部 Paper 插件，依赖 `:api` 子模块，订阅 Bukkit 事件，做任意逻辑
+
+---
+
+## 方式一：`config.yml` 命令钩子
+
+最快接入。比赛主流程触发后，本体会按当前命令模板按行 `Bukkit.dispatchCommand(consoleSender, ...)` 派发。
+
+```yaml
+rewards:
+  enabled: true                        # ← 必须打开总开关
+  commands:
+    on_game_start:
+      - "broadcast 比赛 {arena}（{mode}）开始了！"
+    on_game_end:
+      - "broadcast 比赛 {game} 结束"
+    on_kill:
+      - "points add {player} 5"
+      - "broadcast {player} 击杀了 {victim}"
+    on_first_blood:
+      - "points add {player} 20"
+      - "title {player} title \"\\\"§c首杀!\\\"\""
+    on_eliminated: []                  # 留空 = 不做事
+    on_win:
+      - "points add {player} 100"
+      - "broadcast {player} 拿下胜利"
+    on_top3:
+      - "points add {player} 30"
 ```
-赛季内打比赛 → 拿击杀 / 助攻 / 胜利 / 任务 → 获得战令经验
-                                                    ↓
-                                             升级到下一阶
-                                                    ↓
-                                          领取该阶免费/进阶奖励
+
+### 钩子列表
+
+| 钩子 key | 触发时机 | 派给谁 |
+| --- | --- | --- |
+| `on_game_start` | 比赛进入 `STARTING` 阶段（玩家已锁定） | 每个参赛玩家 |
+| `on_game_end` | 比赛进入 `ENDING` 阶段 | 每个还在场的玩家 |
+| `on_kill` | 玩家击杀玩家（含传奇技能命中） | 击杀者 |
+| `on_first_blood` | 该局第一次击杀 | 击杀者 |
+| `on_eliminated` | 玩家被永久淘汰（不可复活） | 被淘汰玩家 |
+| `on_win` | 比赛结束时仍存活（即胜者队） | 胜者队成员 |
+| `on_top3` | 比赛结束时排名前三的队伍 | Top3 队成员 |
+
+### 占位符
+
+| 占位符 | 含义 | 哪些钩子能用 |
+| --- | --- | --- |
+| `{player}` | 当前要派奖的玩家名 | 全部 |
+| `{victim}` | 被击杀者 | `on_kill` / `on_first_blood` |
+| `{game}` | 比赛 UUID | 全部 |
+| `{arena}` | Arena ID | 全部 |
+| `{mode}` | `solo` / `duo` / `squad` | 全部 |
+
+::: tip 命令以控制台身份执行
+所有命令都从控制台派发，所以 `points add`、`eco give`、`broadcast` 这些不需要做权限处理。
+
+但如果你想 `effect give @s ...` 自指，**记得把 `@s` 换成 `{player}`**。
+:::
+
+::: warning 不要在这里放重逻辑
+钩子里跑的是命令，每条命令都会进主线程命令调度。如果要做"按当前职业等级算奖励金额"这种带条件分支的事情，请用方式二。
+:::
+
+---
+
+## 方式二：`:api` 子模块 + Bukkit 事件
+
+适合做战令 / 排行榜 / 复杂奖励规则。`HopliteRoyale-api` 是公开发布的 jar，你的外部插件 `compileOnly` 它即可。
+
+### 拿 API jar
+
+把 `HopliteRoyale-api-0.1.0.jar` 放到本地 Maven，或者发到你自己的 repo。本地用法：
+
+```bash
+mvn install:install-file \
+  -Dfile=HopliteRoyale-api-0.1.0.jar \
+  -DgroupId=com.k.hopliteroyale \
+  -DartifactId=hopliteroyale-api \
+  -Dversion=0.1.0 \
+  -Dpackaging=jar
 ```
 
-## 玩家命令
+然后在你的外部插件 `build.gradle.kts` 里：
 
-```text
-/bp                   # 打开战令 GUI
-/bp gui               # 同上
-/bp progress          # 查当前等级 / 经验 / 下一阶距离
-/bp season            # 查当前赛季信息
-/bp quests            # 看每日 + 每周任务
-/bp claim all         # 一键领取所有可领取奖励
-/bp purchase          # 开通进阶轨道(占位实现)
+```kotlin
+dependencies {
+    compileOnly("com.k.hopliteroyale:hopliteroyale-api:0.1.0")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+}
 ```
 
-## 经验来源
+`paper-plugin.yml` 声明软依赖：
 
-| 行为 | 战令经验 |
+```yaml
+name: MyHopliteRewards
+version: 0.1.0
+main: com.example.MyHopliteRewards
+api-version: '1.21'
+dependencies:
+  server:
+    HopliteRoyale:
+      load: BEFORE
+      required: false
+      join-classpath: true
+```
+
+### 可订阅事件
+
+事件包：`com.k.hopliteroyale.api.events.*`
+
+| 包 | 事件 | 触发时机 |
+| --- | --- | --- |
+| `events.game` | `GameCreateEvent` / `GameDestroyEvent` | 比赛实例创建 / 销毁 |
+|  | `GameStartEvent` / `GameEndEvent` | 比赛开始 / 结束 |
+|  | `GamePhaseChangeEvent` | 阶段切换 |
+|  | `FirstBloodEvent` / `PlayerKillEvent` / `PlayerEliminatedEvent` | 战斗里程碑 |
+| `events.player` | `PlayerJoinGameEvent` / `PlayerLeaveGameEvent` | 玩家进出比赛 |
+|  | `PlayerKnockDownEvent` / `PlayerReviveEvent` | 倒地 / 复活 |
+|  | `PlayerSpectateEvent` / `PlayerEliminationEvent` | 进入观战 / 被永久淘汰 |
+| `events.team` | `TeamJoinEvent` / `TeamEliminatedEvent` | 入队 / 队伍淘汰 |
+| `events.playerclass` | `PlayerClassSelectEvent` / `PlayerClassLevelUpEvent` | 选择职业 / 升级 |
+| `events.legendary` | `LegendaryCraftEvent` / `LegendaryAbilityUseEvent` | 合成 / 使用传奇技能 |
+| `events.border` | `BorderShrinkStartEvent` / `BorderShrinkFinishEvent` | 缩圈起止 |
+
+### 极简示例 Listener
+
+```java
+package com.example;
+
+import com.k.hopliteroyale.api.events.game.GameEndEvent;
+import com.k.hopliteroyale.api.events.game.PlayerKillEvent;
+import com.k.hopliteroyale.api.events.game.FirstBloodEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public final class MyHopliteRewardsListener implements Listener {
+
+    @EventHandler
+    public void onKill(PlayerKillEvent e) {
+        // e.getKiller() / e.getVictim() / e.getCause() / e.getGame()
+        // 这里调用你自家的积分 / 战令服务
+    }
+
+    @EventHandler
+    public void onFirstBlood(FirstBloodEvent e) {
+        // 全场首杀，做点炫酷的
+    }
+
+    @EventHandler
+    public void onGameEnd(GameEndEvent e) {
+        // e.getGame().getWinningTeam() != null 时是有胜者的局
+    }
+}
+```
+
+### `HopliteRoyaleAPI` 主入口
+
+需要主动查询比赛状态时：
+
+```java
+HopliteRoyaleAPI api = HopliteRoyaleAPI.get();
+IGameManager mgr = api.gameManager();
+mgr.activeGames().forEach(game -> {
+    // game.id() / game.phase() / game.players() / game.teams()
+});
+```
+
+::: tip API 稳定性
+`api/src/main/java/com/k/hopliteroyale/api/` 下的接口与事件是**对外契约**，破坏性改动会标 `@Deprecated` 一个版本后再删除。`com.k.hopliteroyale.api.internal.*` 是实现细节，外部插件**不要直接依赖**。
+:::
+
+### 完整示例插件
+
+仓库自带 `dev-assets/sample-plugin`：独立 Gradle 子项目，演示如何 `compileOnly :api`、订阅事件、构建独立 jar。复制即用。
+
+---
+
+## 该选哪种方式？
+
+| 需求 | 选 |
 | --- | --- |
-| 击杀一人 | +50 |
-| 助攻一人 | +20 |
-| 获胜 | +200 |
-| 参与一局 | +50 |
-| 第一次合出某把传奇 | +100 |
-| 每日 / 每周任务 | 视任务配置 |
-
-::: tip 经验加成
-战令奖励里包含 `XP_BOOST`(经验倍率加成)。装备后,**新获得的战令经验全部按倍率算**。
-:::
-
-## 当前赛季计划
-
-| 赛季 | 时间 |
-| --- | --- |
-| 第一赛季:荣耀初现 | 2026-05-01 ~ 2026-07-31 |
-| 第二赛季:边境回响 | 2026-08-01 ~ 2026-10-31 |
-
-赛季更替的策略和注意事项见[赛季切换](./season)。
+| 给胜者发点积分 / 全服广播 | 命令钩子 |
+| 计算"每日 3 杀解锁奖励" | API + 事件 + 自家存储 |
+| 战令 / 经验加成 / 任务系统 | API + 事件 |
+| 多服群同步排行榜 | API + 事件 + 你自己的同步层 |
+| 把 HopliteRoyale 接到 PlaceholderAPI | API（监听 `PlayerKillEvent` 等更新缓存） |
 
 ---
 
-## 外观系统
+## 常见问题
 
-外观**纯视觉**,不影响战斗数值。三大类,共 9 个内置外观:
+**Q：`rewards.commands` 配了但没生效？**
+检查总开关 `rewards.enabled` 是否打开，并确认 `config.yml` 改完已重启服务器。
 
-### ✨ 击杀特效(Kill Effect)
+**Q：钩子里执行的命令报权限错？**
+全部从控制台派发，权限不是问题；如果命令本身要求玩家，请把 `@s` / `@p` 替换成 `{player}`。
 
-击杀对方时在他身上爆发的视觉:
+**Q：能在钩子里跨多行执行吗？**
+列表的每一行就是一条命令，不需要 `\n`，按数组顺序执行。
 
-| ID | 中文 | 效果 |
-| --- | --- | --- |
-| `kill_effect_fire` | 🔥 火焰终结 | 燃烧粒子 + 火焰圈 |
-| `kill_effect_lightning` | ⚡ 雷霆终结 | 雷击下劈 |
-| `kill_effect_confetti` | 🎉 彩纸终结 | 彩色纸屑 + 烟花声 |
+**Q：API 事件是同步还是异步？**
+全部主线程同步事件——可以直接读写 Bukkit 状态，不要在事件里做长耗时 IO。
 
-### 💃 胜利舞蹈(Victory Dance)
-
-吃鸡那一刻自动播放的庆祝动作:
-
-| ID | 中文 | 效果 |
-| --- | --- | --- |
-| `victory_dance_robot` | 🤖 机器人舞 | 机械姿态 + 电子音 |
-| `victory_dance_moonwalk` | 🌙 月步庆祝 | 月球漫步 + 滑行粒子 |
-| `victory_dance_firework` | 🎆 烟花谢幕 | 多色烟花连续绽放 |
-
-### 🌈 武器尾迹(Weapon Trail)
-
-挥舞武器时跟随的粒子尾迹:
-
-| ID | 中文 | 效果 |
-| --- | --- | --- |
-| `weapon_trail_fire` | 🔥 火焰尾迹 | 武器划过留火焰 |
-| `weapon_trail_enchant` | ✨ 附魔尾迹 | 紫色附魔光 |
-| `weapon_trail_soul` | 👻 灵魂尾迹 | 蓝色灵魂火 |
-
-## 外观命令
-
-```text
-/cosmetic       # 打开外观装备 GUI(三类切换)
-/cosmetics      # 同上
-```
-
-GUI 里:
-
-- 已拥有的会高亮
-- 未拥有的会显示"通过战令第 X 阶解锁"
-- 每类同时只能装备 1 件
-
-::: tip 外观跨赛季保留
-赛季结束后,**战令进度归档重置**,但你已经获得的外观**永久保留**。
-:::
-
----
-
-## 完整配置参考
-
-每个赛季一份 yml,在 `plugins/HopliteRoyale/battlepass/` 下,文件名 `season-<id>.yml`。
-
-### 顶层字段
-
-```yaml
-id: 1
-name: "第一赛季:荣耀初现"
-start: "2026-05-01"
-end: "2026-07-31"
-xp-per-tier: 1000
-tiers:
-  - tier: 1
-    free-reward: { type: COINS, amount: 100 }
-    premium-reward: { type: COSMETIC, id: kill_effect_fire }
-  # ... 更多阶位
-```
-
-| 字段 | 类型 | 必填 | 说明 |
-| --- | --- | --- | --- |
-| `id` | int | ✅ | 赛季编号(1, 2, 3...) |
-| `name` | string | ✅ | 显示名,GUI 里看到的 |
-| `start` | string | ✅ | 开始日期,**ISO 格式 `YYYY-MM-DD`** |
-| `end` | string | ✅ | 结束日期,**ISO 格式 `YYYY-MM-DD`** |
-| `xp-per-tier` | int | ✅ | 升一阶所需战令经验 |
-| `tiers[]` | list | ✅ | 每阶配置 |
-
-### 每一阶 `tiers[]`
-
-```yaml
-- tier: 1
-  free-reward:    { type: COINS, amount: 100 }
-  premium-reward: { type: COSMETIC, id: kill_effect_fire }
-```
-
-| 字段 | 类型 | 必填 | 说明 |
-| --- | --- | --- | --- |
-| `tier` | int | ✅ | 阶位编号(从 1 开始,**连续递增**,不要跳号) |
-| `free-reward` | reward | ✅ | 免费轨奖励(下面三种之一) |
-| `premium-reward` | reward | ✅ | 进阶轨奖励(下面三种之一) |
-
-### 奖励对象(三种类型)
-
-#### `COINS` —— 货币
-
-```yaml
-{ type: COINS, amount: 500 }
-```
-
-| 字段 | 必填 | 说明 |
-| --- | --- | --- |
-| `type` | ✅ | 必须为 `COINS` |
-| `amount` | ✅ | 货币数量(整数) |
-
-#### `COSMETIC` —— 外观
-
-```yaml
-{ type: COSMETIC, id: kill_effect_fire }
-```
-
-| 字段 | 必填 | 说明 |
-| --- | --- | --- |
-| `type` | ✅ | 必须为 `COSMETIC` |
-| `id` | ✅ | 外观 ID,见上面[全部 9 个内置外观](#外观系统) |
-
-#### `XP_BOOST` —— 经验加成
-
-```yaml
-{ type: XP_BOOST, multiplier: 1.5, duration_min: 30 }
-```
-
-| 字段 | 必填 | 默认 | 说明 |
-| --- | --- | --- | --- |
-| `type` | ✅ | — | 必须为 `XP_BOOST` |
-| `multiplier` | ❌ | `1.0` | 战令经验倍率,常用 1.5 / 2.0 |
-| `duration_min` | ❌ | `30` | 持续时长(分钟) |
-
-::: danger ⚠️ 注意 `duration_min` 是下划线
-战令奖励里的 `duration_min` 用**下划线**,不是 `duration-min`。这是和其他配置的连字符风格不一致的特例。
-
-写成 `duration-min` 的话**会被忽略并使用默认 30 分钟**,但插件不会报错——是个静默坑,务必小心。
-:::
-
-### 完整阶位示例(摘自默认 season-1.yml)
-
-```yaml
-id: 1
-name: "第一赛季:荣耀初现"
-start: "2026-05-01"
-end: "2026-07-31"
-xp-per-tier: 1000
-tiers:
-  - tier: 1
-    free-reward:    { type: COINS, amount: 100 }
-    premium-reward: { type: COSMETIC, id: kill_effect_fire }
-  - tier: 2
-    free-reward:    { type: XP_BOOST, multiplier: 1.5, duration_min: 30 }
-    premium-reward: { type: COSMETIC, id: victory_dance_robot }
-  - tier: 3
-    free-reward:    { type: COINS, amount: 150 }
-    premium-reward: { type: COSMETIC, id: weapon_trail_enchant }
-  # ... 总共 50 阶,详见 plugins/HopliteRoyale/battlepass/season-1.yml
-  - tier: 50
-    free-reward:    { type: COINS, amount: 2500 }
-    premium-reward: { type: COINS, amount: 5000 }
-```
-
-### 紧凑式写法
-
-如果阶位很多,可以用 yaml 行内对象写法压缩:
-
-```yaml
-tiers:
-  - { tier: 1, free-reward: { type: COINS, amount: 100 }, premium-reward: { type: COSMETIC, id: kill_effect_fire } }
-  - { tier: 2, free-reward: { type: COINS, amount: 120 }, premium-reward: { type: COSMETIC, id: victory_dance_robot } }
-```
-
-`season-2.yml` 用的就是这种压缩式。
-
----
-
-## 任务系统(每日 / 每周)
-
-每日 / 每周任务**目前由代码生成**,不通过 yml 配置。
-
-任务类型(枚举):
-
-| 类型 | 说明 |
-| --- | --- |
-| `KILLS` | 击杀玩家 N 个 |
-| `WINS` | 赢得 N 局 |
-| `LEGENDARY_USED` | 获得/使用传奇武器 N 次 |
-
-任务对象 (Quest) 字段(参考):
-
-| 字段 | 说明 |
-| --- | --- |
-| `id` | 任务 ID |
-| `type` | 任务类型(上表) |
-| `target` | 目标值(必须 ≥1) |
-| `progress` | 当前进度 |
-| `rewardXp` | 完成奖励战令经验 |
-| `completed` | 是否已完成 |
-| `periodStart` / `periodEnd` | 任务有效期 |
-
-::: tip 后续版本会开放
-计划在后续版本把每日/每周任务模板放进 `battlepass/quests.yml`,届时本页会同步更新。
-:::
-
----
-
-## 赛季切换
-
-详见 → [赛季切换](./season)。
-
-简言之:
-
-```yaml
-# config.yml
-season:
-  auto-switch: true
-```
-
-开启后插件按 `start` / `end` 自动切换赛季,旧赛季进度归档,**外观永久保留**。
-
----
-
-## 修改后
-
-::: warning 战令配置改完要重启
-`battlepass/season-N.yml` **不支持热重载**——赛季逻辑涉及数据库迁移,改完必须重启服务器。
-:::
-
-## 平衡参考
-
-- `xp-per-tier` 默认 1000,大约让活跃玩家**每 1–2 局升 1 阶**
-- 50 阶赛季约需 50,000 战令经验,正常 3 个月可以肝完
-- 想加快节奏,把 `xp-per-tier` 调到 800
-- 想拉长肝度,加阶位数量(到 100 阶),`xp-per-tier` 保持 1000
-- 进阶轨在 1–10 阶给外观,11–50 阶给 COINS 是经典节奏
+**Q：旧版的战令进度数据库表还在吗？**
+迁移已经清理过，老库里残留的战令 / 外观相关表不影响新版本启动。要彻底清理建议手动 `DROP TABLE`。

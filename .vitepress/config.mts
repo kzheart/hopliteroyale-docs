@@ -42,7 +42,7 @@ export default defineConfig({
             { text: '组队模式（单/双/四排）', link: '/guide/team-modes' },
             { text: '职业系统', link: '/guide/kits' },
             { text: '传奇武器', link: '/guide/legendaries' },
-            { text: '战令与外观', link: '/guide/battlepass' }
+            { text: '奖励钩子与外部接入', link: '/guide/battlepass' }
           ]
         },
         {
@@ -53,7 +53,7 @@ export default defineConfig({
             { text: '地图与赛场', link: '/guide/arenas' },
             { text: '配置参考', link: '/guide/configuration' },
             { text: '日常运维', link: '/guide/operations' },
-            { text: '赛季切换', link: '/guide/season' }
+            { text: '赛季（已下线）', link: '/guide/season' }
           ]
         },
         {

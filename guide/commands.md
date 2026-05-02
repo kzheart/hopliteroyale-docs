@@ -11,20 +11,19 @@
 | `/br quickplay duo` | 双排 |
 | `/br quickplay squad` | 四排 |
 | `/br leave` | 离开当前比赛 |
-| `/kit` | 打开职业选择 GUI |
-| `/kit info <职业>` | 查看自己的职业等级 |
-| `/bp` | 打开战令 GUI |
-| `/bp progress` | 查战令进度 |
-| `/bp claim all` | 一键领取奖励 |
-| `/cosmetic` | 装备外观 |
+| `/class` | 打开职业选择 GUI |
+| `/class info <职业>` | 查看自己的职业等级 |
 | `/legendary atlas` | 翻传奇图鉴 |
 | `/recipe legendary` | 看传奇配方 |
+| `/tc <消息>` | 队伍内聊天（别名 `/t`） |
+| `/p <消息>` | Party（大厅）聊天 |
 
 ## ⚔️ 比赛控制
 
 | 命令 | 用途 | 权限 |
 | --- | --- | --- |
-| `/br create <arena> <模式>` | 创建比赛(模式:`solo` / `duo` / `squad`) | 服主 |
+| `/br create <arena> <模式>` | 创建比赛（模式：`solo` / `duo` / `squad`） | 服主 |
+| `/br admin create` | 弹出可视化对话框创建比赛 | `hopliteroyale.admin` |
 | `/br join <比赛 ID>` | 加入指定比赛 | 玩家 |
 | `/br leave` | 离开当前比赛 | 玩家 |
 | `/br quickplay [模式]` | 快速匹配 | 玩家 |
@@ -32,14 +31,14 @@
 | `/br info <比赛 ID>` | 查看比赛详情 | 任意 |
 | `/br forcephase <比赛 ID> <阶段>` | 强制切阶段 | 服主调试 |
 
-阶段名:`WAITING` / `STARTING` / `CORNUCOPIA` / `GRACE` / `PVP` / `SHRINKING` / `ENDING`
+阶段名：`WAITING` / `STARTING` / `CORNUCOPIA` / `GRACE` / `PVP` / `SHRINKING` / `ENDING`
 
-## 👥 Party(大厅组队)
+## 👥 Party（大厅组队）
 
 | 命令 | 用途 |
 | --- | --- |
 | `/party create` | 创建 Party |
-| `/party invite <玩家>` | 邀请(30 秒过期) |
+| `/party invite <玩家>` | 邀请（30 秒过期） |
 | `/party accept <队长>` | 接受邀请 |
 | `/party leave` | 离开 Party |
 | `/party kick <玩家>` | 队长踢人 |
@@ -54,16 +53,20 @@
 | `/tc <消息>` | 发送给当前比赛的队友 |
 | `/t <消息>` | `/tc` 的快捷命令 |
 
-## 🎯 职业(Kit)
+## 🎯 职业（PlayerClass）
 
 | 命令 | 用途 |
 | --- | --- |
-| `/kit` | 打开 GUI |
-| `/kit list` | 查看全部职业 |
-| `/kit select <职业>` | 直接选职业 |
-| `/kit info <职业>` | 查看自己的等级 / 经验 |
+| `/class` | 打开 GUI |
+| `/class list` | 查看全部职业 |
+| `/class select <职业>` | 直接选职业 |
+| `/class info <职业>` | 查看自己的等级 / 经验 |
 
-可用职业 ID:`miner` / `archer` / `tank` / `ninja` / `alchemist` / `scout` / `lumberjack` / `fisher`
+可用职业 ID：`miner` / `archer` / `tank` / `ninja` / `alchemist` / `scout` / `lumberjack` / `fisher`
+
+::: tip 旧命令已下线
+原来的 `/kit` 系列命令已经移除。请改用 `/class`。
+:::
 
 ## 🔥 传奇武器
 
@@ -76,27 +79,9 @@
 | `/legendary reload` | 重载配置 | 服主 |
 | `/legendary perf` | 查看技能调度耗时 | 服主 |
 | `/legendary perf reset` | 重置性能计数 | 服主 |
-| `/legendary giveall <玩家>` | 一键发全套(测试) | 服主 |
+| `/legendary giveall <玩家>` | 一键发全套（测试） | 服主 |
 
-## 🏆 战令(Battle Pass)
-
-| 命令 | 用途 |
-| --- | --- |
-| `/bp` 或 `/bp gui` | 打开战令 GUI |
-| `/bp progress` | 查等级 / 经验 / 距离下一阶 |
-| `/bp season` | 查当前赛季信息 |
-| `/bp quests` | 查每日 / 每周任务 |
-| `/bp claim all` | 一键领可领奖励 |
-| `/bp purchase` | 开通进阶轨道(占位) |
-
-## ✨ 外观
-
-| 命令 | 用途 |
-| --- | --- |
-| `/cosmetic` | 打开装备 GUI |
-| `/cosmetics` | 别名 |
-
-## 🗺️ 地图调试(服主)
+## 🗺️ 地图调试（服主）
 
 | 命令 | 用途 |
 | --- | --- |
@@ -109,3 +94,13 @@
 | 命令 | 用途 |
 | --- | --- |
 | `/version HopliteRoyale` | 查插件版本 |
+
+## 已下线的命令
+
+下面这些命令在历史版本里出现过，**当前版本已经全部移除**，不会再注册到服务器：
+
+| 旧命令 | 替代方案 |
+| --- | --- |
+| `/kit *` | `/class *` |
+| `/bp` / `/bp gui` / `/bp progress` / `/bp claim all` / … | 战令系统已移除，改用 [奖励钩子与外部接入](./battlepass) |
+| `/cosmetic` / `/cosmetics` | 外观系统已移除 |
